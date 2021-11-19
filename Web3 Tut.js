@@ -49,8 +49,55 @@ const init = async() =>{
 
     console.log(contract);
 
-    const result = await contract.methods.getSalePrice(0).call();
+    const result = await contract.methods.getSalePrice(0).call();   // read from sc 
+    /*
+        Result will return a Unhandled promise due to getId web3 error
+    */
     console.log(result);
+
+    const addresses = await web3.eth.getAccounts();       // load accounts
+    const receipt = await contract.methods.mintNft("sample_mint",10,'0x0000000').send({
+        from: addresses[0],
+        gas: 100,       // gas limit
+        gasPrice: 100   // generally to tweak the parameter as per need
+    })
+    console.log(receipt);
+
+    // Send ether to the smart contract 
+    /*
+        1. Execute a function
+        2. Send ether directly (fallback function)
+    */
+        // 1. sending ether to a payable function 
+        await contract.methods.sendEther().send({
+            from: addresses[0],
+            value: '100',     // the value here is in wei
+        })
+
+
+        // fallback 
+        await web3.eth.sendTransaction({
+            from: addresses[0],
+            to: contract.option.address,
+            value: '100000'
+        });
+
+    // Listen to event
+    const receipt = await contract.method.emitEvent('hey').send(
+        {
+            from: addresses[0]
+        }
+    )
+
+    console.log(receipt.events);
+
+    // Listen to events using websockets
+    contract.events.MyEvent({fromBlockNumber: 0})
+        .on('data',event => console.log(event));
+    
+
 }
 
 init();
+
+// Ethereum API ---> call and send
